@@ -204,9 +204,29 @@ export class World extends DurableObject<WorldEnv> {
     `);
   }
 
-  private get seed(): number {
+  /** The seed requested by configuration. Only used when seeding a new world. */
+  private get configuredSeed(): number {
     const n = Number(this.env.WORLD_SEED);
     return Number.isFinite(n) ? Math.trunc(n) : 1;
+  }
+
+  /**
+   * The seed this world was actually generated from.
+   *
+   * Read from storage rather than from configuration, because terrain is
+   * generated exactly once. If the two ever disagree - someone edits
+   * WORLD_SEED on a running season - reporting the configured value would
+   * describe a map that does not exist, and the claim that the board is
+   * verifiably derived from a public seed would quietly stop being true.
+   * The stored value is the honest one.
+   */
+  private get seed(): number {
+    const stored = this.metaValue('seed');
+    if (stored !== null) {
+      const n = Number(stored);
+      if (Number.isFinite(n)) return Math.trunc(n);
+    }
+    return this.configuredSeed;
   }
 
   /** Lays out the season's map. Runs once per Durable Object. */
@@ -214,10 +234,13 @@ export class World extends DurableObject<WorldEnv> {
     const [{ n }] = this.sql.exec<CountRow>('SELECT COUNT(*) AS n FROM tiles').toArray();
     if (n > 0) return;
 
-    const terrain = generateTerrain(this.seed);
+    const seed = this.configuredSeed;
+    const terrain = generateTerrain(seed);
     for (let id = 0; id < TILE_COUNT; id++) {
       this.sql.exec('INSERT INTO tiles (id, terrain) VALUES (?, ?)', id, terrain[id]);
     }
+    // Record the seed this map came from, so it can always be reported truthfully.
+    this.sql.exec('INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)', 'seed', String(seed));
     this.sql.exec(
       'INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)',
       'started_at',

@@ -35,7 +35,7 @@
 
   "vars": {
     "SEASON_ID": "S1",
-    "WORLD_SEED": "20260907",
+    "WORLD_SEED": "20260908",
     "NIMIQ_NETWORK": "main"
   }
 }

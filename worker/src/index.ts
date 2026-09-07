@@ -46,9 +46,15 @@ function err(code: string, message: string): ApiResponse<never> {
   return { ok: false, error: { code, message } };
 }
 
-/** Every season is one Durable Object, addressed by its season id. */
+/**
+ * Every world is one Durable Object, addressed by season *and* seed.
+ *
+ * Including the seed means changing it starts a genuinely fresh world rather
+ * than leaving an existing one with terrain that no longer matches the
+ * configured seed. It is also the supported way to reset a world.
+ */
 function world(env: Env) {
-  return env.WORLD.get(env.WORLD.idFromName(`season:${env.SEASON_ID}`));
+  return env.WORLD.get(env.WORLD.idFromName(`season:${env.SEASON_ID}:${env.WORLD_SEED}`));
 }
 
 function sessionSecret(env: Env): string | null {
