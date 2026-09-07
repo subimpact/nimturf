@@ -1,0 +1,38 @@
+{
+  "name": "nimturf",
+  "private": true,
+  "version": "1.0.0",
+  "license": "MIT",
+  "type": "module",
+  "description": "NimTurf - a deterministic pixel-art turf war incremental game for Nimiq Pay",
+  "scripts": {
+    "dev": "npm run dev --workspace=web",
+    "dev:api": "npm run dev --workspace=worker",
+    "build": "npm run build --workspace=web",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit && npm run typecheck --workspace=worker && npm run typecheck --workspace=web",
+    "test:watch": "vitest",
+    "test:worker": "npm run test --workspace=worker",
+    "test:all": "npm test && npm run test:worker",
+    "e2e": "node scripts/e2e.mjs"
+  },
+  "workspaces": [
+    "packages/*",
+    "web",
+    "worker"
+  ],
+  "devDependencies": {
+    "@nimiq/core": "^2.21.0",
+    "puppeteer-core": "^24.43.1",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.7"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "esbuild@0.28.1": true,
+    "workerd@1.20260903.1": true
+  },
+  "dependencies": {
+    "@noble/hashes": "^1.8.0"
+  }
+}
