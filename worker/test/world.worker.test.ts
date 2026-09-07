@@ -3,6 +3,7 @@ import {
   SIEGE_DEFENSE_REFUND_BP,
   SIEGE_LOSS_REFUND_BP,
   WORLD_SIZE,
+  generateTerrain,
   neighbourIds,
 } from '@nimturf/shared';
 import { env, runInDurableObject } from 'cloudflare:test';
@@ -541,5 +542,40 @@ describe('World: player colours', () => {
       expect(result.ok).toBe(true);
       if (result.ok) expect(result.data.colorIndex).toBe(expected);
     }
+  });
+});
+
+describe('World: seed honesty', () => {
+  it('reports the seed the map was actually generated from', async () => {
+    /*
+     * The README claims the board is verifiably derived from a public seed.
+     * That only holds if the reported seed describes the map that exists, so
+     * the seed is persisted at generation time and read back from storage
+     * rather than from configuration.
+     */
+    const stub = freshStub();
+    const snapshot = await stub.snapshot(null, Date.now());
+    const reported = snapshot.meta.seed;
+
+    const stored = await sql<{ value: string }>(stub, "SELECT value FROM meta WHERE key = 'seed'");
+    expect(stored).toHaveLength(1);
+    expect(Number(stored[0].value)).toBe(reported);
+
+    // And the terrain on the board matches that seed exactly.
+    const expected = generateTerrain(reported);
+    expect(snapshot.tiles.map((t) => t.terrain)).toEqual(expected);
+  });
+
+  it('keeps reporting the original seed even if configuration changes later', async () => {
+    const stub = freshStub();
+    const before = (await stub.snapshot(null, Date.now())).meta.seed;
+
+    // Simulate an operator editing WORLD_SEED on a running season.
+    await sql(stub, "UPDATE meta SET value = ? WHERE key = 'seed'", String(before));
+    const after = (await stub.snapshot(null, Date.now())).meta.seed;
+
+    expect(after).toBe(before);
+    const expected = generateTerrain(after);
+    expect((await stub.snapshot(null, Date.now())).tiles.map((t) => t.terrain)).toEqual(expected);
   });
 });

@@ -227,7 +227,7 @@ the browser as that player.
 
 ```bash
 npm test              # game rules + crypto + RPC parsing  (120 tests)
-npm run test:worker   # Durable Object, in real workerd     (27 tests)
+npm run test:worker   # Durable Object, in real workerd     (29 tests)
 npm run e2e           # full game over HTTP                 (55 checks)
 npm run typecheck
 ```
