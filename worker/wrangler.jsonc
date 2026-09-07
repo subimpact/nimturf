@@ -1,0 +1,41 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "nimturf",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-01-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+
+  /*
+   * The built frontend is served by this same Worker, so the game is a single
+   * deployment on a single origin. That removes cross-origin requests from the
+   * picture entirely, which is one less thing to misconfigure and one less
+   * round trip on first load.
+   *
+   * `run_worker_first` keeps /api/* on the Worker; everything else falls back
+   * to index.html so client-side routing works.
+   */
+  "assets": {
+    "directory": "../web/dist",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+
+  "durable_objects": {
+    "bindings": [{ "name": "WORLD", "class_name": "World" }]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      // SQLite-backed Durable Object: one strongly consistent, transactional
+      // source of truth with no read-modify-write races.
+      "new_sqlite_classes": ["World"]
+    }
+  ],
+
+  "vars": {
+    "SEASON_ID": "S1",
+    "WORLD_SEED": "20260907",
+    "NIMIQ_NETWORK": "main"
+  }
+}

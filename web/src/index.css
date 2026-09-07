@@ -1,0 +1,178 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:is(.dark *));
+
+/**
+ * NimTurf visual system.
+ *
+ * A dark, high-contrast palette built on Nimiq's brand blue and gold. Corners
+ * are almost square and shadows are hard-edged, so the chrome around the
+ * pixel-art map reads as part of the same world rather than a web form
+ * wrapped around a game.
+ */
+:root {
+  --radius: 2px;
+
+  --background: #0a0c14;
+  --foreground: #e6e9f2;
+
+  --card: #121627;
+  --card-foreground: #e6e9f2;
+  --popover: #161b30;
+  --popover-foreground: #e6e9f2;
+
+  /* Nimiq blue, lifted for legibility on a near-black ground. */
+  --primary: #1f9ce4;
+  --primary-foreground: #04121c;
+
+  --secondary: #1c2238;
+  --secondary-foreground: #cdd4e6;
+
+  --muted: #1a1f33;
+  --muted-foreground: #8a93ad;
+
+  /* Nimiq gold, used exclusively for on-chain things: NIM and deeds. */
+  --accent: #e9b213;
+  --accent-foreground: #1a1400;
+
+  --destructive: #e0533f;
+  --destructive-foreground: #fff5f3;
+
+  --border: #242b45;
+  --input: #242b45;
+  --ring: #1f9ce4;
+
+  /* Game semantics */
+  --turf: #21bca5;
+  --raid: #e0533f;
+  --deed: #e9b213;
+
+  /* Territory palette: eight distinguishable owner colours. */
+  --owner-0: #1f9ce4;
+  --owner-1: #e0533f;
+  --owner-2: #21bca5;
+  --owner-3: #e9b213;
+  --owner-4: #a06ce0;
+  --owner-5: #e07ab8;
+  --owner-6: #7fc93a;
+  --owner-7: #e08a2e;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-turf: var(--turf);
+  --color-raid: var(--raid);
+  --color-deed: var(--deed);
+
+  --radius-sm: 1px;
+  --radius-md: var(--radius);
+  --radius-lg: 3px;
+  --radius-xl: 4px;
+
+  --font-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-mono);
+    /* A faint grid, like graph paper under the city. */
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, 0.022) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.022) 1px, transparent 1px);
+    background-size: 16px 16px;
+    -webkit-font-smoothing: antialiased;
+    /* The map is pannable; never let the page itself rubber-band. */
+    overscroll-behavior: none;
+  }
+
+  /* Respect the notch / home indicator inside Nimiq Pay. */
+  #root {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  ::selection {
+    background: var(--primary);
+    color: var(--primary-foreground);
+  }
+}
+
+@layer utilities {
+  /* Keeps generated sprites crisp at any integer zoom. */
+  .pixelated {
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+  }
+
+  /* Hard-edged panel shadow, in keeping with the pixel aesthetic. */
+  .shadow-pixel {
+    box-shadow: 0 2px 0 0 rgba(0, 0, 0, 0.6);
+  }
+
+  .tracking-display {
+    letter-spacing: 0.14em;
+  }
+
+  /* Tabular digits stop counters from jittering as they tick up. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+}
+
+/* A slow pulse for tiles under raid. */
+@keyframes raid-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+.animate-raid {
+  animation: raid-pulse 1.1s steps(2, end) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-raid {
+    animation: none;
+  }
+}

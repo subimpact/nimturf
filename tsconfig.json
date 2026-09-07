@@ -1,0 +1,10 @@
+{
+  // Covers the shared rules package and its tests. The Worker and the web app
+  // each have their own tsconfig, because they need different global types
+  // (Cloudflare Workers vs the DOM); `npm run typecheck` runs all three.
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM"]
+  },
+  "include": ["packages/shared/**/*.ts", "vitest.config.ts"]
+}
